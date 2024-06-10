@@ -94,7 +94,7 @@ function openPost(t,type) {
         <div class="post">
             <div class="postInfo">
             <h1>`+JSON.parse(postData[t]).title+`</h1>
-                <p class="date">Posted on `+JSON.parse(postdata[t]).date+`</p>
+                <p class="date">Posted on `+JSON.parse(postData[t]).date+`</p>
             </div>
             `+JSON.parse(postData[t]).body+`
         </div>sf
