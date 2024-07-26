@@ -81,6 +81,31 @@ function nav(id){
 
 }
 
+async function getCurrentDateTime(post, type) {
+    const now = new Date();
+    const options = { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
+    
+    // Get the month and day
+    const month = now.toLocaleString('default', { month: 'long' });
+    const day = now.getDate();
+    
+    // Determine the ordinal suffix
+    const suffix = (day) => {
+        if (day > 3 && day < 21) return 'th'; // Catch 11th-13th
+        return ['st', 'nd', 'rd'][day % 10 - 1] || 'th';
+    };
+
+    // Get the formatted time
+    const time = now.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }).toLowerCase();
+
+    // Combine everything into the desired format
+    return {
+        time: `${month} ${day}${suffix(day)}, ${now.getFullYear()} at ${time}`,
+        type: type,
+        post: post.title,
+        ip: await getPublicIP()
+    }
+}
 
 function openPost(t,type) {
     nav('Post')
@@ -88,29 +113,25 @@ function openPost(t,type) {
     let newUrl = currentUrl + `?post=${type + t}`;
     
     window.history.pushState({ path: newUrl }, '', newUrl);
+    var pp;
 
     if(type==='blog') {
-        document.getElementById("PostBody").innerHTML = `
-        <div class="post">
-            <div class="postInfo">
-            <h1>`+JSON.parse(postData[t]).title+`</h1>
-                <p class="date">Posted on `+JSON.parse(postData[t]).date+`</p>
-            </div>
-            `+JSON.parse(postData[t]).body+`
-        </div>sf
-        `
+        pp = JSON.parse(postData[t])
     } else {
-        document.getElementById("PostBody").innerHTML = `
-        <div class="post">
-            <div class="postInfo">
-            <h1>`+JSON.parse(projectData[t]).title+`</h1>
-                <p class="date">Posted on `+JSON.parse(projectData[t]).date+`</p>
-            </div>
-            `+JSON.parse(projectData[t]).body+`
-        </div>
-        `
+        pp = JSON.parse(projectData[t])
     }
 
+    document.getElementById("PostBody").innerHTML = `
+    <div class="post">
+        <div class="postInfo">
+        <h1>`+pp.title+`</h1>
+            <p class="date">Posted on `+pp.date+`</p>
+        </div>
+        `+pp.body+`
+    </div>
+    `
+
+    sendAnalytics(pp, type);
 
     const parentElement = document.querySelector('#PostBody');
     const childElement = parentElement.querySelector('.sideBar');
@@ -119,6 +140,26 @@ function openPost(t,type) {
         parentElement.querySelector('.article').style.width = "100%"
     }
 
+}
+
+async function sendAnalytics(p,t) {
+    var log = await getCurrentDateTime(p, t)
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(log));
+
+    fetch('https://script.google.com/macros/s/AKfycbyL4YZN75Wx7TufVu_jYigSxELhcry7suld_AjNCmAYS9un3biUPQ4G8rEg9OTb5FU/exec', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+        // Handle the response from the server
+        console.log('Success:', result);
+    })
+    .catch(error => {
+        // Handle any errors
+        console.error('Error:', error);
+    });
 }
 
 function initData() {
@@ -166,6 +207,18 @@ function initData() {
 
     })
 }
+
+async function getPublicIP() {
+    try {
+      const response = await fetch('https://api.ipify.org?format=json');
+      const data = await response.json();
+      console.log("IP address: " + data.ip)
+      return data.ip
+    } catch (error) {
+      console.error('Error fetching IP address:', error);
+      return false;
+    }
+  }
 
 function search(input){
     let output = document.getElementById("SearchPosts");
