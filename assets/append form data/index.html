@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="styles.css">
+	<script src="https://unpkg.com/monaco-editor@0.23.0/min/vs/loader.js"></script>
+</head>
+<body>
+	<div class="container">
+		<div class="cont">
+			<h4>Post Maker</h4>
+			<select id="select">
+			  <option value="Blog Posts">Blog Posts</option>
+			  <option value="Project Posts">Project Posts</option>
+			</select>
+			<input type="text" id="title" placeholder="Title Here..."></input>
+			<div id="editor">
+
+			</div>
+		</div>
+		<form method="post" action="" name="contact-form">
+		<textarea style="display: none;"id="message" rows="7" placeholder="Post HTML to append:"></textarea>
+		<input type="submit" value="Submit" id="submit" onclick="submitForm()">
+		</form>
+	</div>
+
+	<script src="script.js"></script>
+</body>
+</html>
